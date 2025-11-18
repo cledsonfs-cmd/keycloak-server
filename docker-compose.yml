@@ -1,53 +1,33 @@
-version: '3.8'
+keycloak:
+  image: quay.io/keycloak/keycloak:21.1.1
+  volumes:
+    - ./kc-dist:/opt/keycloak   # <<< usa versão buildada
+  environment:
+    KC_DB: postgres
+    KC_DB_URL_HOST: postgres
+    KC_DB_USERNAME: keycloak
+    KC_DB_PASSWORD: CFSpgss1976@
+    KC_DB_SCHEMA: public
 
-services:
-  postgres:
-    image: postgres:14
-    environment:
-      POSTGRES_DB: keycloak
-      POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: CFSpgss1976@
-    volumes:
-      - ./curso_spring_db:/var/lib/postgresql/data
-      - ./init-schema.sql:/docker-entrypoint-initdb.d/init-schema.sql
-    ports:
-      - "3333:5432"
-    networks:
-      - keycloak_network
+    KEYCLOAK_ADMIN: admin
+    KEYCLOAK_ADMIN_PASSWORD: CFSpgss1976@
 
-  keycloak:
-    image: quay.io/keycloak/keycloak:21.1.1
-    environment:
-      KC_DB: postgres
-      KC_DB_URL_HOST: postgres
-      KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: CFSpgss1976@
-      KC_DB_SCHEMA: public
+    JAVA_OPTS: >
+      -Xms256m
+      -Xmx512m
+      -XX:MetaspaceSize=96m
+      -XX:MaxMetaspaceSize=150m
 
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: CFSpgss1976@
+  command: start
 
-      # 🔥 CONFIG DE MEMÓRIA MAIS LEVE
-      JAVA_OPTS: >
-        -Xms256m
-        -Xmx512m
-        -XX:MetaspaceSize=96m
-        -XX:MaxMetaspaceSize=150m
+  deploy:
+    resources:
+      limits:
+        memory: 800m
 
-    command: start
-
-    deploy:
-      resources:
-        limits:
-          memory: 800m   # 🔥 Limite total reduzido
-
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-    networks:
-      - keycloak_network
-
-networks:
-  keycloak_network:
-    driver: bridge
+  ports:
+    - "8080:8080"
+  depends_on:
+    - postgres
+  networks:
+    - keycloak_network
