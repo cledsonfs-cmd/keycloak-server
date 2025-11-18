@@ -27,20 +27,19 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: CFSpgss1976@
 
-      # 🔥 MELHORIAS DE MEMÓRIA
-      JAVA_OPTS: |
-        -Xms512m
-        -Xmx1500m
-        -XX:MetaspaceSize=256m
-        -XX:MaxMetaspaceSize=512m
+      # 🔥 CONFIG DE MEMÓRIA MAIS LEVE
+      JAVA_OPTS: >
+        -Xms256m
+        -Xmx512m
+        -XX:MetaspaceSize=96m
+        -XX:MaxMetaspaceSize=150m
 
     command: start-dev
 
-    # 🔥 Limite de memória do container (evita OOM Kill)
     deploy:
       resources:
         limits:
-          memory: 2g
+          memory: 800m   # 🔥 Limite total reduzido
 
     ports:
       - "8080:8080"
