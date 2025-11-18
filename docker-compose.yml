@@ -34,7 +34,7 @@ services:
         -XX:MetaspaceSize=96m
         -XX:MaxMetaspaceSize=150m
 
-    command: start-dev
+    command: start
 
     deploy:
       resources:
