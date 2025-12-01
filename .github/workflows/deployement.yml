@@ -1,36 +1,37 @@
-# This is a basic workflow to help you get started with Actions
+name: CI/CD Keycloak Server
 
-name: CI
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  build_and_push:
+    name: Build & Push Docker Image
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    permissions:
+      contents: read
+      packages: write
+
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USER }}
+          password: ${{ secrets.GHCR_TOKEN }}
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: Build Docker image
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          docker build -t ghcr.io/cledsonfs-cmd/keycloak-server:latest .
+
+      - name: Push Docker image
+        run: |
+          docker push ghcr.io/cledsonfs-cmd/keycloak-server:latest
+
+      - name: Trigger EasyPanel redeploy
+        run: |
+          curl -X POST ${{ secrets.EASYPANEL_WEBHOOK }}
